@@ -1,3 +1,11 @@
+//Die Trying
+//2020-10-26
+//Nolan Seymour 100745224
+//Lily Wu 100808422
+//Nathaniel Moore 100785826
+//Nicholas Gauthier 100754586
+//Krishanth Varatharajah 100787963
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,151 +20,176 @@ void gBoard();
 void move(int t);
 void overCard(int iv, int ib, int player);
 void zombieWave(int wb);
-int playerInfo[4][18];//holds the information for each player in the game
+void endGame();
+int playerInfo[4][20];//holds the information for each player in the game
 string board[21][21];//holds the gme board that gets displayed
 string itemType[4];//holds the names of the different types of items to be displayed when exchnging clothing
 int index[13][2];//holds the statistical values for the cards
 
-
-int main(int t, int r, int w, int wb)
+//this is the main function of the game. it puts items on the board, keeps track of waves, and tracks players turn
+//int t: recursive value tracking turns
+//int r: recursive value tracking rounds
+//int w: recursive value tracking the wave chance
+//int wb: recursive value tracking the number of waves
+//int ro: recursie value tracking when to roll for cards again
+//int turn: tracks which players turn it is
+//round: tracks which round it is in the game
+//int c: counter setting the array value for playerInfo
+//int wave: tracks the chance of a wave happening
+//int waveChecks: checks if a wave should happen
+//int rolling: determins when cards should be distributed
+int main(int t, int r, int w, int wb, int ro)
 {
-    string testline;
     int turn = t;
     int round = r;
-    int end = 50;
+    int end = 1000;
     int c = 0;
     int wave = w;
     int waveBonus = wb;
     int waveCheck;
+    int rolling = ro;
 
-    if (round > end) {
-        round = 1;
-        wave = 0;
-    }//end if round
-
-    cout << turn << " turn\n" << round << " round\n";
-
-    while (round == 1 && c != 4) {
-
-        playerInfo[c][0] = c + 1;//players number
-
-        //player cords
-        playerInfo[0][1] = 15;//x cord p1
-        playerInfo[0][2] = 9;//y cord p1 
-        playerInfo[1][1] = 15;//x cord p2
-        playerInfo[1][2] = 10;//y cord p2
-        playerInfo[2][1] = 6;//x cord p3
-        playerInfo[2][2] = 9;//y cord p3
-        playerInfo[3][1] = 6;//x cord p4
-        playerInfo[3][2] = 10;//y cord p4
-
-        playerInfo[c][3] = 0;//scavenge boost
-        playerInfo[c][4] = 0;//movement boost
-        playerInfo[c][5] = 0;//attack boost
-
-        playerInfo[c][6] = 2;//food
-        playerInfo[c][7] = 1;//barriers
-
-        c = c + 1;
-    }//end while round
-
-    if (turn == 1 && round == 1) {//gets the board from board.txt
-        cout << "getting boaard from file\n";
-        ifstream file1{ "board.txt" };
-        if (!file1.is_open()) return -1;
-
-
-        for (int i{}; i != 21; ++i) {
-            for (int j{}; j != 21; ++j) {
-                file1 >> board[i][j];
-            }//end for j
-        }//end for i
-
-        ifstream file2{ "index.txt" };
-        if (!file2.is_open()) return -1;
-
-
-        for (int i{}; i != 13; ++i) {//gets the index values for the items from index.txt
-            for (int j{}; j != 2; ++j) {
-                file2 >> index[i][j];
-            }//end for j
-        }//end for i
-    }//end if turn
-
-    if (wave == 0) {
-
-        int result = roll();
-
-        switch (result) {
-        case 1:
-            if (board[3][3] == ".")
-                board[3][3] = "T";
-            break;
-        case 2:
-            if (board[3][16] == ".")
-                board[3][16] = "T";
-            break;
-        case 3:
-            if (board[10][3] == ".")
-                board[10][3] = "T";
-            break;
-        case 4:
-            if (board[10][16] == ".")
-                board[10][16] = "T";
-            break;
-        case 5:
-            if (board[17][3] == ".")
-                board[17][3] = "T";
-            break;
-        case 6:
-            if (board[17][16] == ".")
-                board[17][16] = "T";
-            break;
-        default:
-            break;
-        }//end switch result
-    }//end if wave
-
-    gBoard();
-
-    if (round > 1) {
-        while (turn <= 4) {
-            move(turn);
-            turn = turn + 1;
-        }//end while turn
-    }//end if round
-
-
-    if (round > 2 && turn > 4) {
-
-        waveCheck = 1;
-
-        cout << "wave: " << wave << "\n";
-        cout << "wave checl: " << waveCheck << "\n";
-
-        if (waveCheck >= wave && wave >= waveCheck) {
-            zombieWave(waveBonus);
+    if (waveBonus != 6) {
+        if (round > end) {
+            round = 1;
             wave = 0;
-            waveBonus = waveBonus + 1;
-        }
-        else {
-            wave = wave + 1;
-        }//end if waveCheck
-    }//end if round
+        }//end if round
+
+        cout << turn << " turn\n" << round << " round\n";
+
+        if (turn == 1 && round == 1)
+            rolling = 0;
+        //end if turn
+
+        while (round == 1 && c != 4) {
+
+            playerInfo[c][0] = c + 1;//players number
+
+            //player cords
+            playerInfo[0][1] = 15;//x cord p1
+            playerInfo[0][2] = 9;//y cord p1 
+            playerInfo[1][1] = 15;//x cord p2
+            playerInfo[1][2] = 10;//y cord p2
+            playerInfo[2][1] = 6;//x cord p3
+            playerInfo[2][2] = 9;//y cord p3
+            playerInfo[3][1] = 6;//x cord p4
+            playerInfo[3][2] = 10;//y cord p4
+
+            playerInfo[c][3] = 0;//scavenge boost
+            playerInfo[c][4] = 0;//movement boost
+            playerInfo[c][5] = 0;//attack boost
+
+            playerInfo[c][6] = 2;//food
+            playerInfo[c][7] = 1;//barriers
+
+            c = c + 1;
+        }//end while round
+
+        if (turn == 1 && round == 1) {//gets the board from board.txt
+            cout << "getting boaard from file\n";
+            ifstream file1{ "board.txt" };
+            if (!file1.is_open()) return -1;
 
 
-    turn = turn + 1;
+            for (int i{}; i != 21; ++i) {
+                for (int j{}; j != 21; ++j) {
+                    file1 >> board[i][j];
+                }//end for j
+            }//end for i
 
-    if (turn > 4) {
-        turn = 1;
-        round = round + 1;
-        cout << "turn: " << turn << "\n";
-        cout << "round: " << round << "\n";
-    }//end if turn
+            ifstream file2{ "index.txt" };
+            if (!file2.is_open()) return -1;
 
-    if (round != 10) {//recursive call of main function
-        main(turn, round, wave, waveBonus);
-    }//end if round
+
+            for (int i{}; i != 13; ++i) {//gets the index values for the items from index.txt
+                for (int j{}; j != 2; ++j) {
+                    file2 >> index[i][j];
+                }//end for j
+            }//end for i
+        }//end if turn
+
+        if (rolling == 0) {
+
+            for (int i{}; i != 4; ++i) {
+                int result = roll();
+
+                switch (result) {
+                case 1:
+                    if (board[3][3] == ".")
+                        board[3][3] = "T";
+                    break;
+                case 2:
+                    if (board[3][16] == ".")
+                        board[3][16] = "T";
+                    break;
+                case 3:
+                    if (board[10][3] == ".")
+                        board[10][3] = "T";
+                    break;
+                case 4:
+                    if (board[10][16] == ".")
+                        board[10][16] = "T";
+                    break;
+                case 5:
+                    if (board[17][3] == ".")
+                        board[17][3] = "T";
+                    break;
+                case 6:
+                    if (board[17][16] == ".")
+                        board[17][16] = "T";
+                    break;
+                default:
+                    break;
+                }//end switch result
+            }//end for i
+        }//end if wave
+
+        rolling = rolling + 1;
+        cout << rolling;
+
+        gBoard();
+
+        if (round > 1) {
+            while (turn <= 4) {
+                move(turn);
+                turn = turn + 1;
+            }//end while turn
+        }//end if round
+
+        if (round > 2 && turn > 4) {
+
+            waveCheck = roll();
+
+            cout << "wave: " << wave << "\n";
+            cout << "wave checl: " << waveCheck << "\n";
+
+            if (waveCheck <= wave && waveCheck != 6) {
+                zombieWave(waveBonus);
+                wave = 0;
+                rolling = 0;
+                waveBonus = waveBonus + 1;
+            }
+            else {
+                wave = wave + 1;
+            }//end if waveCheck
+        }//end if round
+
+
+        turn = turn + 1;
+
+        if (turn > 4) {
+            turn = 1;
+            round = round + 1;
+            cout << "turn: " << turn << "\n";
+            cout << "round: " << round << "\n";
+        }//end if turn
+
+        main(turn, round, wave, waveBonus, rolling);
+
+    }//end if waveBonus
+    else {
+        endGame();
+    }
 
     return 0;
 }//end int main
@@ -191,15 +224,34 @@ void gBoard() {
 //int x: the x coordinate of the player moving
 //int y: the y coordinate of the player moving
 //char choice: takes in selection from player on which direction to move
+//int sCheck: checks if the player can scavenge or not
+//string sChoice: holds choice on if player wants to scavenge or not
+
 void move(int t) {
     int m = roll() + roll() + playerInfo[t - 1][4];//determines player movement
     int x;
     int y;
-    char choice = 0;
+    string choice = " ";
     int sCheck = 0;
-    int sChoice = 3;
+    string sChoice = " ";
     int pass;
-    int maxS = 1 + playerInfo[t - 1][3];
+    int maxS = 2 + playerInfo[t - 1][3];
+
+    //handling when a player can scavenging
+
+    if (playerInfo[t - 1][8] != 0) {
+        playerInfo[t - 1][19] = playerInfo[t - 1][19] + 1;
+    }//end if playerInfo[i][8]
+
+    if (playerInfo[t - 1][19] >= 2) {
+        playerInfo[t - 1][19] = 0;
+        playerInfo[t - 1][8] = 0;
+    }//end if plyerinfo[i][19]
+
+    if (playerInfo[t - 1][8] == 7) {
+        playerInfo[t - 1][8] = 0;
+        playerInfo[t - 1][19] = 0;
+    }//end if playerInfo[i][8]
 
     x = playerInfo[t - 1][1];
     y = playerInfo[t - 1][2];
@@ -215,11 +267,11 @@ void move(int t) {
 
         m = m - 1;
 
-        cout << "\n\nPress w to move up\n Press s to move down\n Press a to move left\n Press d to move right\n";
+        cout << "\n\nPress w to move up\nPress s to move down\nPress a to move left\nPress d to move right\npress o to skip your remaining moves\n";
         cout << "Select a movement: ";
         cin >> choice;
 
-        if (choice == 'w') {//moves player up
+        if (choice == "w") {//moves player up
             x = x - 1;
             if (board[x][y] == ".") {
                 board[x][y] = to_string(t);
@@ -241,9 +293,10 @@ void move(int t) {
                 cout << "You cannot move there\n";
                 m = m + 1;
                 x = x + 1;
+                gBoard();
             }//end if board
         }
-        else if (choice == 's') {//moves player down
+        else if (choice == "s") {//moves player down
             x = x + 1;
             if (board[x][y] == ".") {
                 board[x][y] = to_string(t);
@@ -265,9 +318,10 @@ void move(int t) {
                 cout << "You cannot move there\n";
                 m = m + 1;
                 x = x - 1;
+                gBoard();
             }//end if board
         }
-        else if (choice == 'a') {//moves player left
+        else if (choice == "a") {//moves player left
             y = y - 1;
             if (board[x][y] == ".") {
                 board[x][y] = to_string(t);
@@ -289,9 +343,10 @@ void move(int t) {
                 cout << "You cannot move there\n";
                 m = m + 1;
                 y = y + 1;
+                gBoard();
             }//end if board
         }
-        else if (choice == 'd') {//moves player right
+        else if (choice == "d") {//moves player right
             y = y + 1;
             if (board[x][y] == ".") {
                 board[x][y] = to_string(t);
@@ -313,10 +368,15 @@ void move(int t) {
                 cout << "You cannot move there\n";
                 m = m + 1;
                 y = y - 1;
+                gBoard();
             }//end if board
         }
+        else if (choice == "o") {
+            m = 0;
+            gBoard();
+        }
         else {//error handling for incorrect entry
-            cout << "Invalid entry";
+            cout << "Invalid entry\n";
             m = m + 1;
         }//end if c
     }//end while m
@@ -349,13 +409,13 @@ void move(int t) {
         }
 
         if (sCheck == 1) {
-            while (sChoice != 1 || sChoice != 2) {//error check for sChoice
+            while (sChoice != "1" || sChoice != "2") {//error check for sChoice
                 cout << "Would you like to scavenge for an item?\n";
                 cout << "If yes enter 1, if no enter 2: ";
                 cin >> sChoice;
 
 
-                if (sChoice == 1) {
+                if (sChoice == "1") {
                     pass = roll();
                     cout << maxS << "\n";
                     cout << pass << "\n";
@@ -368,7 +428,7 @@ void move(int t) {
                         break;
                     }//end if
                 }
-                else if (sChoice == 2) {
+                else if (sChoice == "2") {
                     break;
                 }
                 else {
@@ -405,7 +465,7 @@ void cardPickup(int t) {
     itemBuff = index[r][1];
 
     if (itemValue == 1) {//if player is recieving a weapon card
-        cout << "You picked up a weapon with a strength of " << itemBuff;
+        cout << "You picked up a weapon with a strength of " << itemBuff << "\n";
 
         if (playerInfo[player][9] == 0) {//sets the card values to player's weapon slot 1
             playerInfo[player][9] = itemBuff;
@@ -441,7 +501,7 @@ void cardPickup(int t) {
                     cout << "dropped the weapon you picked up\n";
                 }
                 else {
-                    cout << "Invalid Input";
+                    cout << "Invalid Input\n";
                 }//endn if decision
             }//end while decision
         }//end if playerInfo
@@ -516,7 +576,7 @@ void cardPickup(int t) {
     }
     else {//yea lets hope this one never happens
         cout << "Something went wrong\n";
-    }//end if itemValue   
+    }//end if itemValue
 }//end viod cardPickup
 
 //this function will have a player discard a piece of clothing when they have a full inventory
@@ -663,13 +723,16 @@ void overCard(int iv, int ib, int player) {
 }//end viod overCard
 
 
-
+//This function carries out the events that occure when a zombie wave happens
+//int waveStrength: determins the strength of the zombies
+//int bonus: keeps track of when players use food or barriers
+//string decision: tracks the players decision on if they use a barrier or not
 void zombieWave(int wb) {
-    int waveStrength = roll() + roll() + wb + playerInfo[0][17] + playerInfo[1][17] + playerInfo[2][17] + playerInfo[3][17];
+    int waveStrength = roll() + wb + playerInfo[0][17] + playerInfo[1][17] + playerInfo[2][17] + playerInfo[3][17]; //determins strength of wave
     int bonus = 0;
     string decision;
 
-    cout << "The Strength of the wave is " << waveStrength << "\n";
+    cout << "\nThe Strength of the wave is " << waveStrength << "\n";
 
     for (int i{}; i != 4; ++i) {
 
@@ -679,8 +742,9 @@ void zombieWave(int wb) {
 
             bonus = 0;
 
-            cout << "Player " << i + 1 << " has a strength of " << playerInfo[i][5] << "\n";
-            cout << "Player " << i + 1 << " has " << playerInfo[i][6] << " Food. How much food do you want to use.\n1 food gives +1 strength";
+            //prompts player if they want to use food
+            cout << "\nPlayer " << i + 1 << " has a strength of " << playerInfo[i][5] << "\n";
+            cout << "Player " << i + 1 << " has " << playerInfo[i][6] << " Food. How much food do you want to use.\n1 food gives +1 strength\n";
             cout << "Enter an amount: ";
             cin >> foodUse;
 
@@ -691,14 +755,15 @@ void zombieWave(int wb) {
                 break;
             }
             else {
-                cout << "Invalid entry. Plese enter a value within the amount of food you have";
+                cout << "Invalid entry. Plese enter a value within the amount of food you have\n";
             }//end if foodUse
         }//end while foodUse
 
+        //prompts player if they want to use their barrier
         if (playerInfo[i][7] == 1) {
             while (decision != "1" || decision != "2") {
-                cout << "Player " << i + 1 << "'s strength is: " << playerInfo[i][5] + bonus << "\n";
-                cout << "Does player " << i + 1 << " want to use their barrier?\n If yes enter 1, if no enter 2\n";
+                cout << "Player " << i + 1 << "'s strength after eating is: " << playerInfo[i][5] + bonus << "\n";
+                cout << "Does player " << i + 1 << " want to use their barrier for an aditional 3 strength?\n If yes enter 1, if no enter 2\n";
                 cout << "Make a selection: ";
                 cin >> decision;
 
@@ -711,13 +776,14 @@ void zombieWave(int wb) {
                     break;
                 }
                 else {
-                    cout << "Invalid entry";
+                    cout << "Invalid entry\n";
                 }//end if decisison
             }//end while decision
         }//end if playerInfo
 
         if (playerInfo[i][5] + bonus < waveStrength) {
             cout << "Player " << i + 1 << " had a strength of " << playerInfo[i][5] + bonus << " did not survive the wave.\n";
+            //resets the players stats and position to how they started at begining of game
             playerInfo[i][3] = 0;
             playerInfo[i][4] = 0;
             playerInfo[i][5] = 0;
@@ -730,36 +796,212 @@ void zombieWave(int wb) {
             playerInfo[i][14] = 0;
             playerInfo[i][15] = 0;
             playerInfo[i][16] = 0;
-            playerInfo[i][17] = playerInfo[i][17] + 1;
+            playerInfo[i][17] = playerInfo[i][17] + 1;//death counter
 
-            switch (i) {
+            switch (i) {//visually reseting where player is on board after death
             case 0:
                 board[playerInfo[0][1]][playerInfo[0][2]] = ".";
                 board[15][9] = "1";
                 playerInfo[0][1] = 15;//x cord p1
                 playerInfo[0][2] = 9;//y cord p1 
+
+                //determins if player survived final wave or not
+                if (wb == 5)
+                    playerInfo[0][18] = 1;
+                //end if wb
+
                 break;
             case 1:
                 board[playerInfo[1][1]][playerInfo[1][2]] = ".";
                 board[15][10] = "2";
                 playerInfo[1][1] = 15;//x cord p2
                 playerInfo[1][2] = 10;//y cord p2
+
+                if (wb == 5)
+                    playerInfo[1][18] = 1;
+                //end if wb
+
                 break;
             case 2:
                 board[playerInfo[2][1]][playerInfo[2][2]] = ".";
                 board[6][9] = "3";
                 playerInfo[2][1] = 6;//x cord p3
                 playerInfo[2][2] = 9;//y cord p3
+
+                if (wb == 5)
+                    playerInfo[2][18] = 1;
+                //end if wb
+
                 break;
             case 3:
                 board[playerInfo[3][1]][playerInfo[3][2]] = ".";
                 board[6][10] = "4";
                 playerInfo[3][1] = 6;//x cord p4
                 playerInfo[3][2] = 10;//y cord p4
+
+                if (wb == 5)
+                    playerInfo[3][18] = 1;
+                //end if wb
+
             }//end switch i
         }
         else {
-            cout << "Player " << i + 1 << " survuved the wave.\n";
+            cout << "Player " << i + 1 << " survived the wave.\n";
         }//end if playerInfo[i][5]
     }//end for i
 }//end void zombieWave
+
+//this function tallies up final scores
+//int p1: player 1 points
+//int p2: player 2 points
+//int p3: player 3 points
+//int p4: player 4 points
+//int point: tracks who gets the points
+void endGame() {
+
+    int p1 = 0;
+    int p2 = 0;
+    int p3 = 0;
+    int p4 = 0;
+    int point;
+
+    // gives players points based on highest scavenging boost
+    if (playerInfo[0][3] > playerInfo[1][3])
+        point = 2;
+    else if (playerInfo[2][3] > playerInfo[1][3])
+        point = 3;
+    else if (playerInfo[2][3] > playerInfo[3][3])
+        point = 4;
+    else
+        point = 1;
+    //end if playerInfo[1][3]
+
+    switch (point) {
+    case 1:
+        p1 = p1 + 2;
+        cout << "Player 1 had the highest scavenging skill.\n\n";
+        break;
+    case 2:
+        p2 = p2 + 2;
+        cout << "Player 2 had the highest scavenging skill.\n\n";
+        break;
+    case 3:
+        p3 = p3 + 2;
+        cout << "Player 3 had the highest scavenging skill.\n\n";
+        break;
+    case 4:
+        p4 = p4 + 2;
+        cout << "Player 4 had the highest scavenging skill.\n\n";
+    }//end switch point
+
+
+    // gives players points based on most movement
+    if (playerInfo[0][4] > playerInfo[1][4])
+        point = 2;
+    else if (playerInfo[2][4] > playerInfo[1][4])
+        point = 3;
+    else if (playerInfo[2][4] > playerInfo[3][4])
+        point = 4;
+    else
+        point = 1;
+    //end if playerInfo[1][3]
+
+    switch (point) {
+    case 1:
+        p1 = p1 + 1;
+        cout << "Player 1 could move the furthest.\n\n";
+        break;
+    case 2:
+        p2 = p2 + 1;
+        cout << "Player 2 could move the furthest.\n\n";
+        break;
+    case 3:
+        p3 = p3 + 1;
+        cout << "Player 3 could move the furthest.\n\n";
+        break;
+    case 4:
+        p4 = p4 + 1;
+        cout << "Player 4 could move the furthest.\n\n";
+    }//end switch point
+
+
+    // gives players points based on most attack
+    if (playerInfo[0][5] > playerInfo[1][5])
+        point = 2;
+    else if (playerInfo[2][5] > playerInfo[1][5])
+        point = 3;
+    else if (playerInfo[2][5] > playerInfo[3][5])
+        point = 4;
+    else
+        point = 1;
+    //end if playerInfo[1][3]
+
+    switch (point) {
+    case 1:
+        p1 = p1 + 1;
+        cout << "Player 1 had the highest strength.\n\n";
+        break;
+    case 2:
+        p2 = p2 + 1;
+        cout << "Player 2 had the highest strength.\n\n";
+        break;
+    case 3:
+        p3 = p3 + 1;
+        cout << "Player 3 had the highest strength.\n\n";
+        break;
+    case 4:
+        p4 = p4 + 1;
+        cout << "Player 4 had the highest strength.\n\n";
+    }//end switch point
+
+
+    //gives players points if they did not die
+    if (playerInfo[0][17] == 0) {
+        p1 = p1 + 2;
+        cout << "Player 1 did survived all waves\n\n";
+    }//end if p1
+
+    if (playerInfo[1][17] == 0) {
+        p2 = p2 + 2;
+        cout << "Player 2 did survived all waves\n\n";
+    }//end if p2
+
+    if (playerInfo[2][17] == 0) {
+        p3 = p3 + 2;
+        cout << "Player 3 did survived all waves\n\n";
+    }//end if p3
+
+    if (playerInfo[3][17] == 0) {
+        p4 = p4 + 2;
+        cout << "Player 4 did survived all waves\n\n";
+    }//end if p4
+
+
+    //gives player points if they lived last wave
+    if (playerInfo[0][18] == 0) {
+        p1 = p1 + 1;
+        cout << "Player 1 survived the final wave\n\n";
+    }//end if p1
+
+    if (playerInfo[1][18] == 0) {
+        p2 = p2 + 1;
+        cout << "Player 2 survived the final wave\n\n";
+    }//end if p2
+
+    if (playerInfo[2][18] == 0) {
+        p3 = p3 + 1;
+        cout << "Player 3 survived the final wave\n\n";
+    }//end if p3
+
+    if (playerInfo[3][18] == 0) {
+        p4 = p4 + 1;
+        cout << "Player 4 survived the final wave\n\n";
+    }//end if p4
+
+    //final point display
+    cout << "\n\nPlayer 1 finished with: " << p1 << " points\n";
+    cout << "Player 2 finished with: " << p2 << " points\n";
+    cout << "Player 3 finished with: " << p3 << " points\n";
+    cout << "Player 4 finished with: " << p4 << " points\n";
+
+}//end void endGame
